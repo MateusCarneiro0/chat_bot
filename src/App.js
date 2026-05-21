@@ -2,17 +2,29 @@ import { useEffect, useRef, useState } from "react";
 import FaceIcon from "@mui/icons-material/Face";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import { GoogleGenAI } from "@google/genai";
-import { KEY_1 } from "./Keys";// Adding your api key from gemini
+import { KEY_1 } from "./Keys"; // Adding your api key from gemini
+import { SyncLoader } from "react-spinners";
 
 function App() {
   const [chats, setChats] = useState(["Chat 1"]);
   const [selectedChat, setSelectedChat] = useState("Chat 1");
-  const ai = useRef(null)
+  const [isReadyChat, setIsReadyChat] = useState(false);
+  const [chat, setChat] = useState(null);
 
   useEffect(() => {
-    ai.current = new GoogleGenAI({
-      apiKey: KEY_1,
-    });
+    async function MountTheAI() {
+      try {
+        const ai = new GoogleGenAI({
+          apiKey: KEY_1,
+        });
+        setChat(ai.chats.create({ model: "gemini-3-flash-preview" }));
+        setIsReadyChat(true);
+      } catch (error) {
+        console.error(error);
+        setIsReadyChat(false);
+      }
+    }
+    MountTheAI();
   }, []);
   return (
     <div className="app">
@@ -21,30 +33,46 @@ function App() {
         chats={chats}
         setSelectedChat={setSelectedChat}
       />
-      <Chat ai={ai.current} />
+      {isReadyChat ? <Chat chat={chat} /> : <SyncLoader />}
     </div>
   );
 }
-function Chat({ai}) {
-  const [messages, setMessages] = useState([{ user: "say", robot: "hello" }]);
-  const [isLoading,setIsLoading] = useState(false)
-  
+function Chat({ chat }) {
+  const [userMessages, setUserMessages] = useState(["say"]);
+  const [robotMessages, setRobotMessages] = useState(["hello"]);
+
+  const [messages, setMessages] = useState([]);
   const inputRef = useRef(null);
-  const handleSendMessage = () => {
-    setIsLoading(true)
-    setMessages((histo) => [...histo,{user:inputRef.current.value,robot:""}])
-  }
+  useEffect(() => {
+    setMessages(
+      userMessages.map((message, i) => ({
+        user: message,
+        robot: robotMessages.at(i) ?? "",
+      }))
+    );
+  }, [userMessages, robotMessages]);
+  const handleSendMessage = async () => {
+    function toogleRobotMessages() {
+      chat
+        .sendMessage({ message: inputRef.current.value })
+        .then((res) => setRobotMessages((messages) => [...messages, res.text]));
+    }
+
+    setUserMessages((histo) => [...histo, inputRef.current.value]);
+    toogleRobotMessages();
+  };
+
   return (
     <div className="chat">
       {messages.map((chat) => {
         return (
           <>
             <Message>{chat.user}</Message>
-            <Message robot={true}>{chat.robot}</Message>
+            <Message robot={true}>{chat.robot || <SyncLoader />}</Message>
           </>
         );
       })}
-      <Input inputRef={inputRef}/>
+      <Input inputRef={inputRef} onSendMessage={handleSendMessage} />
     </div>
   );
 }
@@ -67,7 +95,7 @@ function NavBar({ selectedChat, chats, setSelectedChat }) {
   );
 }
 
-function Input({ inputRef }) {
+function Input({ inputRef, onSendMessage }) {
   return (
     <div className="container-input">
       <input
@@ -77,7 +105,7 @@ function Input({ inputRef }) {
         placeholder="type something"
         type="text"
       />
-      <button>Send</button>
+      <button onClick={onSendMessage}>Send</button>
     </div>
   );
 }
