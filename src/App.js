@@ -49,18 +49,12 @@ function Chat({ chat }) {
   const [userMessages, setUserMessages] = useState(["say"]);
   const [robotMessages, setRobotMessages] = useState(["hello"]);
   const [isLoading, setIsLoading] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const messages = userMessages.map((message, i) => ({
+    user: message,
+    robot: robotMessages.at(i) ?? "",
+  }));//!Como quando um estado é mudado ele re-renderiza todos os filhos toda vez que muda ele consegue mudar
 
   const inputRef = useRef(null);
-
-  useEffect(() => {
-    setMessages(
-      userMessages.map((message, i) => ({
-        user: message,
-        robot: robotMessages.at(i) ?? "",
-      }))
-    );
-  }, [userMessages, robotMessages]);
 
   const handleSendMessage = async () => {
     if (!inputRef.current.value) return;
@@ -130,13 +124,13 @@ function Input({ inputRef, onSendMessage, isLoading }) {
   useKeydown(() => inputRef.current.focus(), "Space", true);
   useKeydown(onSendMessage, "Enter", false);
   useEffect(() => {
-    if(isLoading){
-      setIsFocus(false)
+    if (isLoading) {
+      setIsFocus(false);
     }
-  },[isLoading])
+  }, [isLoading]);
   return (
     <div className="container-input">
-      <input
+      <textarea
         disabled={isLoading}
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
@@ -150,7 +144,7 @@ function Input({ inputRef, onSendMessage, isLoading }) {
         <IconButton
           sx={{
             position: "fixed",
-            bottom: `${isFocus ? "80px" : "70px"}`,
+            bottom: `${isFocus ? "95px" : "85px"}`,
             marginLeft: "150px",
             transition: "all 0.3s ease-in",
           }}
@@ -163,7 +157,7 @@ function Input({ inputRef, onSendMessage, isLoading }) {
   );
 }
 
-function Message({ children, robot }) {
+function Message({ children, robot,isLast }) {
   const robotStyle = {
     display: "flex",
     alignItems: "center",
@@ -179,6 +173,7 @@ function Message({ children, robot }) {
           overflowWrap: "break-word",
           whiteSpace: "normal",
           wordBreak: "break-all",
+          animation:"typing 3s steps(2, end) infinite, blink-caret 0.75s step-end infinite;"
         }}
       >
         {children}
