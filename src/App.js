@@ -46,7 +46,7 @@ function App() {
       }
     }
     MountTheAI();
-  }, []);
+  }, [selectedChat]);
   return (
     <div className="app">
       <NavBar
