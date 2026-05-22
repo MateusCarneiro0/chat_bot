@@ -15,8 +15,10 @@ import { KEY_1 } from "./Keys"; // Adding your api key from gemini
 import { SyncLoader } from "react-spinners";
 
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 
 function App() {
   const [chats, setChats] = useState(["Chat 1"]);
@@ -84,10 +86,10 @@ function Chat({ chat }) {
   };
   useEffect(() => {
     window.scrollTo({
-      top:document.body.scrollHeight - 15,
-      behavior:"smooth"
-    })
-  },[messages])
+      top: document.body.scrollHeight - 15,
+      behavior: "smooth",
+    });
+  }, [messages]);
   useGSAP(() => {
     gsap.registerPlugin(ScrollTrigger);
 
@@ -106,7 +108,7 @@ function Chat({ chat }) {
           trigger: ".button-container",
           start: "top 100px",
           end: "bottom 100px",
-          scrub:true,
+          scrub: true,
         },
       }
     );
@@ -115,12 +117,15 @@ function Chat({ chat }) {
   return (
     <div className="chat">
       <div className="button-container">
-        <IconButton onClick={() => {
-          window.scrollTo({
-            top:0,
-            behavior:"smooth"
-          })
-        }} className="up-button">
+        <IconButton
+          onClick={() => {
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }}
+          className="up-button"
+        >
           <ArrowCircleUpTwoToneIcon
             sx={{
               width: "50px",
@@ -214,22 +219,39 @@ function Message({ children, robot, isLast }) {
   const robotStyle = {
     display: "flex",
     alignItems: "center",
-    margin: `40px ${robot ? 15 : 80}px ${isLast ? 150 : 0}px ${
+    margin: `40px ${robot ? 15 : 80}px ${isLast ? 190 : 0}px ${
       robot ? 80 : 15
     }px`,
     gap: "5px",
     justifySelf: robot && "right",
   };
+
+  const messageRef = useRef(null);
+
+  useGSAP(() => {
+    gsap.registerPlugin(SplitText);
+
+    if (typeof children === "string" && messageRef.current) {
+      const duration = children.split("").length >= 100 ? 0.01:0.03
+      const split = new SplitText(messageRef.current, { type: "chars, words" });
+      gsap.from(split.chars, {
+        opacity: 0,
+        duration: duration,
+        stagger: duration,
+        ease: "power1.in",
+      });
+    }
+  }, [children]);
   return (
     <div style={{ ...robotStyle }}>
       {!robot && <FaceIcon />}
       <p
+        ref={messageRef}
+        className="message-text"
         style={{
           overflowWrap: "break-word",
           whiteSpace: "normal",
           wordBreak: "break-all",
-          animation:
-            "typing 3s steps(2, end) infinite, blink-caret 0.75s step-end infinite",
         }}
       >
         {children}
@@ -240,7 +262,3 @@ function Message({ children, robot, isLast }) {
 }
 
 export default App;
-
-/**
- *
- */
