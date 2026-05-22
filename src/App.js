@@ -51,6 +51,25 @@ function App() {
     }
     MountTheAI();
   }, [selectedChat]);
+
+  useKeydown(
+    () =>
+      setChats((chatsState) => [
+        ...chatsState,
+        `Chat ${chatsState.length + 1}`,
+      ]),
+    "KeyM",
+    true
+  );
+  useKeydown(
+    () =>
+      setChats((chatsState) => {
+        localStorage.clear();
+        return ["Chat 1"];
+      }),
+    "KeyQ",
+    true
+  );
   return (
     <div className="app">
       <NavBar
@@ -97,7 +116,10 @@ function Chat({ chat, selectedChat }) {
     if (!inputRef.current.value) return;
     async function toogleRobotMessages() {
       setIsLoading(true);
-      if (inputRef.current.value !== "hello") {
+      if (
+        inputRef.current.value === "Olá" &&
+        inputRef.current.value !== "/help"
+      ) {
         chat
           .sendMessage({ message: inputRef.current.value })
           .then(async (res) => {
@@ -106,8 +128,16 @@ function Chat({ chat, selectedChat }) {
             setIsLoading(false);
           });
       } else {
+        const helpMessage =
+          "Para usar você pode:\n\n<ul><li>Digite <em>Olá</em> e veja o que chatbot diz</li><li>Ctrl + Space: Para Escrever</li><li>Enter: Para Enviar</li><li>Ou Ctrl + m: para adicionar um chat</li><li>Ctrl + q: Limpar todos os chats(e recarregue)</li></ul>";
+
         setTimeout(() => {
-          setRobotMessages((messages) => [...messages, "<h1>Olá</h1>"]);
+          setRobotMessages((messages) => [
+            ...messages,
+            inputRef.current.value === "Olá"
+              ? "Olá que bom que está usando nosso serviço de chatbot <strong>Como posso ajudar?</strong>"
+              : helpMessage,
+          ]);
           setIsLoading(false);
         }, 3000);
       }
@@ -232,7 +262,7 @@ function Input({ inputRef, onSendMessage, isLoading }) {
         ref={inputRef}
         name={`chat-input`}
         className="chat-input"
-        placeholder="type something"
+        placeholder="type something or type /help"
         type="text"
       />
       {!isLoading && (
