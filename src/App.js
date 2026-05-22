@@ -23,6 +23,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 
 function App() {
+  //!Modificando a chave o estado é resetado assim ele não replica o chat porque elementos iguais na mesma posição o react não faz nada
+
   const [chats, setChats] = useLocalStorage(["Chat 1", "Chat 2"], "chats");
   const [selectedChat, setSelectedChat] = useState("Chat 1");
   const [isReadyChat, setIsReadyChat] = useState(false);
@@ -46,7 +48,7 @@ function App() {
       }
     }
     MountTheAI();
-  }, []);
+  }, [selectedChat]);
   return (
     <div className="app">
       <NavBar
@@ -55,7 +57,7 @@ function App() {
         setSelectedChat={setSelectedChat}
       />
       {isReadyChat ? (
-        <Chat chat={chat} selectedChat={selectedChat} />
+        <Chat key={selectedChat} chat={chat} selectedChat={selectedChat} />
       ) : (
         <SyncLoader />
       )}
@@ -86,7 +88,7 @@ function Chat({ chat, selectedChat }) {
         robot: robotMessages.at(i) ?? "",
       }))
     );
-  }, [userMessages, robotMessages, setMessages]);
+  }, [userMessages, robotMessages, setMessages,selectedChat]);
   const inputRef = useRef(null);
 
   const handleSendMessage = async () => {
