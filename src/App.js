@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
+
 import { useKeydown } from "./hooks/useKeydown";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
 import FaceIcon from "@mui/icons-material/Face";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import ArrowCircleUpTwoToneIcon from "@mui/icons-material/ArrowCircleUpTwoTone";
 
-import { IconButton } from "@mui/material";
+import { IconButton, FormControl, MenuItem, Select } from "@mui/material";
 
 import { GoogleGenAI } from "@google/genai";
 
@@ -21,10 +23,14 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 
 function App() {
-  const [chats, setChats] = useState(["Chat 1"]);
+  const [chats, setChats] = useLocalStorage(["Chat 1", "Chat 2"], "chats");
   const [selectedChat, setSelectedChat] = useState("Chat 1");
   const [isReadyChat, setIsReadyChat] = useState(false);
   const [chat, setChat] = useState(null);
+
+  useEffect(() => {
+    document.title = selectedChat;
+  }, [selectedChat]);
 
   useEffect(() => {
     async function MountTheAI() {
@@ -48,19 +54,39 @@ function App() {
         chats={chats}
         setSelectedChat={setSelectedChat}
       />
-      {isReadyChat ? <Chat chat={chat} /> : <SyncLoader />}
+      {isReadyChat ? (
+        <Chat chat={chat} selectedChat={selectedChat} />
+      ) : (
+        <SyncLoader />
+      )}
     </div>
   );
 }
-function Chat({ chat }) {
-  const [userMessages, setUserMessages] = useState(["say"]);
-  const [robotMessages, setRobotMessages] = useState(["hello"]);
+function Chat({ chat, selectedChat }) {
+  const [userMessages, setUserMessages] = useState(() => {
+    const value = JSON.parse(localStorage.getItem(selectedChat));
+    return value?.length ? value.map((chat) => chat.user) : [];
+  });
+  const [robotMessages, setRobotMessages] = useState(() => {
+    const value = JSON.parse(localStorage.getItem(selectedChat));
+    return value?.length ? value.map((chat) => chat.robot) : [];
+  });
   const [isLoading, setIsLoading] = useState(null);
-  const messages = userMessages.map((message, i) => ({
-    user: message,
-    robot: robotMessages.at(i) ?? "",
-  })); //!Como quando um estado é mudado ele re-renderiza todos os filhos toda vez que muda ele consegue mudar
-
+  const [messages, setMessages] = useLocalStorage(
+    userMessages?.map((message, i) => ({
+      user: message,
+      robot: robotMessages.at(i) ?? "",
+    })) || [],
+    selectedChat
+  ); //!Como quando um estado é mudado ele re-renderiza todos os filhos toda vez que muda ele consegue mudar
+  useEffect(() => {
+    setMessages(
+      userMessages?.map((message, i) => ({
+        user: message,
+        robot: robotMessages.at(i) ?? "",
+      }))
+    );
+  }, [userMessages, robotMessages, setMessages]);
   const inputRef = useRef(null);
 
   const handleSendMessage = async () => {
@@ -162,16 +188,20 @@ function NavBar({ selectedChat, chats, setSelectedChat }) {
   return (
     <div className="navbar" id="initial-section">
       <h1>ChatBot</h1>
-      <select
-        value={selectedChat}
-        onChange={(ev) => setSelectedChat(ev.target.value)}
-      >
-        {chats.map((chat) => (
-          <option key={chat} value={chat}>
-            {chat}
-          </option>
-        ))}
-      </select>
+      <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+        <Select
+          labelId="demo-simple-select-standard-label"
+          id="demo-simple-select-standard"
+          value={selectedChat}
+          onChange={(ev) => setSelectedChat(ev.target.value)}
+        >
+          {chats.map((chat) => (
+            <MenuItem key={chat} value={chat}>
+              {chat}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
     </div>
   );
 }
@@ -232,7 +262,7 @@ function Message({ children, robot, isLast }) {
     gsap.registerPlugin(SplitText);
 
     if (typeof children === "string" && messageRef.current) {
-      const duration = children.split("").length >= 100 ? 0.01:0.03
+      const duration = children.split("").length >= 100 ? 0.01 : 0.03;
       const split = new SplitText(messageRef.current, { type: "chars, words" });
       gsap.from(split.chars, {
         opacity: 0,
