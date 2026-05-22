@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { useKeydown } from "./hooks/useKeydown";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
+import { marked } from "marked";
+
 import FaceIcon from "@mui/icons-material/Face";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
@@ -88,18 +90,21 @@ function Chat({ chat, selectedChat }) {
         robot: robotMessages.at(i) ?? "",
       }))
     );
-  }, [userMessages, robotMessages, setMessages,selectedChat]);
+  }, [userMessages, robotMessages, setMessages, selectedChat]);
   const inputRef = useRef(null);
 
   const handleSendMessage = async () => {
     if (!inputRef.current.value) return;
-    function toogleRobotMessages() {
+    async function toogleRobotMessages() {
       setIsLoading(true);
       if (inputRef.current.value !== "hello") {
-        chat.sendMessage({ message: inputRef.current.value }).then((res) => {
-          setRobotMessages((messages) => [...messages, res.text]);
-          setIsLoading(false);
-        });
+        chat
+          .sendMessage({ message: inputRef.current.value })
+          .then(async (res) => {
+            const responseText = await marked.parse(res.text);
+            setRobotMessages((messages) => [...messages, responseText]);
+            setIsLoading(false);
+          });
       } else {
         setTimeout(() => {
           setRobotMessages((messages) => [...messages, "<h1>Olá</h1>"]);
@@ -277,17 +282,20 @@ function Message({ children, robot, isLast }) {
   return (
     <div style={{ ...robotStyle }}>
       {!robot && <FaceIcon />}
-      <p
-        ref={messageRef}
-        className="message-text"
-        style={{
-          overflowWrap: "break-word",
-          whiteSpace: "normal",
-          wordBreak: "break-all",
-        }}
-      >
-        {children}
-      </p>
+      {typeof children === "string" ? (
+        <p
+          ref={messageRef}
+          className="message-text"
+          style={{
+            overflowWrap: "break-word",
+            whiteSpace: "normal",
+            wordBreak: "break-all",
+          }}
+          dangerouslySetInnerHTML={{ __html: children }}
+        />
+      ) : (
+        <p className="message-text">{children}</p>
+      )}
       {robot && <SmartToyIcon />}
     </div>
   );
