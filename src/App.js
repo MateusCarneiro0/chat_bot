@@ -51,8 +51,8 @@ function App() {
   );
 }
 function Chat({ chat }) {
-  const [userMessages, setUserMessages] = useState(["say","say","say","say","say","say","say","say","say","say","say","say","say","say","say","say","say","say",]);
-  const [robotMessages, setRobotMessages] = useState(["hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello"]);
+  const [userMessages, setUserMessages] = useState(["say"]);
+  const [robotMessages, setRobotMessages] = useState(["hello"]);
   const [isLoading, setIsLoading] = useState(null);
   const messages = userMessages.map((message, i) => ({
     user: message,
@@ -72,7 +72,7 @@ function Chat({ chat }) {
         });
       } else {
         setTimeout(() => {
-          setRobotMessages((messages) => [...messages, "Deu tudo certo"]);
+          setRobotMessages((messages) => [...messages, "<h1>Olá</h1>"]);
           setIsLoading(false);
         }, 3000);
       }
@@ -82,14 +82,19 @@ function Chat({ chat }) {
     toogleRobotMessages();
     inputRef.current.value = "";
   };
-
+  useEffect(() => {
+    window.scrollTo({
+      top:document.body.scrollHeight - 15,
+      behavior:"smooth"
+    })
+  },[messages])
   useGSAP(() => {
     gsap.registerPlugin(ScrollTrigger);
 
     gsap.fromTo(
       ".up-button",
       {
-        x: "1000px",
+        x: "100vh",
         opacity: 0,
         rotation: "180deg",
       },
@@ -101,7 +106,7 @@ function Chat({ chat }) {
           trigger: ".button-container",
           start: "top 100px",
           end: "bottom 100px",
-          scrub:true
+          scrub:true,
         },
       }
     );
