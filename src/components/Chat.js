@@ -40,9 +40,7 @@ export default function Chat({ chat, selectedChat }) {
     if (!inputRef.current.value) return;
     async function toogleRobotMessages() {
       setIsLoading(true);
-      if (
-        inputRef.current.value !== "/help"
-      ) {
+      if (inputRef.current.value !== "/help") {
         chat
           .sendMessage({ message: inputRef.current.value })
           .then(async (res) => {
@@ -52,7 +50,7 @@ export default function Chat({ chat, selectedChat }) {
           });
       } else {
         const helpMessage =
-          "Para usar você pode:\n\n<ul><li>Ctrl + Space: Para Escrever</li><li>Enter: Para Enviar</li><li>Ou Ctrl + m: para adicionar um chat</li><li>Ctrl + q: Limpar todos os chats(e recarregue)</li></ul>";
+          "Para usar você pode:\n\n<ul><li>Ctrl + Space: Para Escrever</li><li>Enter: Para Enviar</li><li>Ou Ctrl + m: para adicionar um chat</li><li>Ctrl + q: Limpar todos os chats(e recarregue)</li><li><strong>Dica:</strong>qualquer erro ou atraso recarregue a página!</li></ul>";
 
         setTimeout(() => {
           setRobotMessages((messages) => [
