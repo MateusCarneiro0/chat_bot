@@ -65,6 +65,7 @@ function App() {
     () =>
       setChats((chatsState) => {
         localStorage.clear();
+        window.location.reload(true)
         return ["Chat 1"];
       }),
     "KeyQ",
@@ -315,7 +316,7 @@ function Message({ children, robot, isLast }) {
       {typeof children === "string" ? (
         <p
           ref={messageRef}
-          className="message-text"
+          className={`message-text ${robot ? "robot":"user"}`}
           style={{
             overflowWrap: "break-word",
             whiteSpace: "normal",

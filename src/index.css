@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@100..900&family=Ga+Maamli&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -11,6 +13,8 @@
 }
 .navbar h1{
   margin-right: 450px;
+  font-family: "Bitcount Grid Double";
+  color: blue;
 }
 .navbar select {
   align-self: center;
@@ -38,6 +42,7 @@
   overflow: hidden;
   padding-left: 20px;
   padding-top: 35px;
+  font-family: fantasy;
 }
 .chat-input:not([disabled]) {
   border: 0.8px rgba(128, 128, 128, 0.3) solid;
@@ -68,5 +73,11 @@
   width: 100%;
   height: 225px;
   right: 50%;
+}
+.robot{
+  font-family: "Quantico";
+}
+.user{
+  font-family: "Work Sans";
 }
 
