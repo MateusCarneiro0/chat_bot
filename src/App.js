@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useKeydown } from "./hooks/useKeydown";
 
 import FaceIcon from "@mui/icons-material/Face";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
@@ -47,7 +48,7 @@ function App() {
 function Chat({ chat }) {
   const [userMessages, setUserMessages] = useState(["say"]);
   const [robotMessages, setRobotMessages] = useState(["hello"]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(null);
   const [messages, setMessages] = useState([]);
 
   const inputRef = useRef(null);
@@ -80,7 +81,7 @@ function Chat({ chat }) {
 
     setUserMessages((histo) => [...histo, inputRef.current.value]);
     toogleRobotMessages();
-    inputRef.current.value = ""
+    inputRef.current.value = "";
   };
 
   return (
@@ -107,7 +108,7 @@ function Chat({ chat }) {
 
 function NavBar({ selectedChat, chats, setSelectedChat }) {
   return (
-    <div className="navbar">
+    <div className="navbar" id="initial-section">
       <h1>ChatBot</h1>
       <select
         value={selectedChat}
@@ -125,6 +126,14 @@ function NavBar({ selectedChat, chats, setSelectedChat }) {
 
 function Input({ inputRef, onSendMessage, isLoading }) {
   const [isFocus, setIsFocus] = useState(false);
+
+  useKeydown(() => inputRef.current.focus(), "Space", true);
+  useKeydown(onSendMessage, "Enter", false);
+  useEffect(() => {
+    if(isLoading){
+      setIsFocus(false)
+    }
+  },[isLoading])
   return (
     <div className="container-input">
       <input
@@ -137,17 +146,19 @@ function Input({ inputRef, onSendMessage, isLoading }) {
         placeholder="type something"
         type="text"
       />
-      <IconButton
-        sx={{
-          position: "fixed",
-          bottom: `${isFocus ? "80px" : "70px"}`,
-          marginLeft: "150px",
-          transition: "all 0.3s ease-in",
-        }}
-        onClick={onSendMessage}
-      >
-        <SendRoundedIcon />
-      </IconButton>
+      {!isLoading && (
+        <IconButton
+          sx={{
+            position: "fixed",
+            bottom: `${isFocus ? "80px" : "70px"}`,
+            marginLeft: "150px",
+            transition: "all 0.3s ease-in",
+          }}
+          onClick={onSendMessage}
+        >
+          <SendRoundedIcon />
+        </IconButton>
+      )}
     </div>
   );
 }
