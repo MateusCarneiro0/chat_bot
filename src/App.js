@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from "react";
+
 import FaceIcon from "@mui/icons-material/Face";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
+
+import { IconButton } from "@mui/material";
+
 import { GoogleGenAI } from "@google/genai";
+
 import { KEY_1 } from "./Keys"; // Adding your api key from gemini
+
 import { SyncLoader } from "react-spinners";
 
 function App() {
@@ -40,9 +47,11 @@ function App() {
 function Chat({ chat }) {
   const [userMessages, setUserMessages] = useState(["say"]);
   const [robotMessages, setRobotMessages] = useState(["hello"]);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([]);
+
   const inputRef = useRef(null);
+
   useEffect(() => {
     setMessages(
       userMessages.map((message, i) => ({
@@ -51,28 +60,47 @@ function Chat({ chat }) {
       }))
     );
   }, [userMessages, robotMessages]);
+
   const handleSendMessage = async () => {
+    if (!inputRef.current.value) return;
     function toogleRobotMessages() {
-      chat
-        .sendMessage({ message: inputRef.current.value })
-        .then((res) => setRobotMessages((messages) => [...messages, res.text]));
+      setIsLoading(true);
+      if (inputRef.current.value !== "hello") {
+        chat.sendMessage({ message: inputRef.current.value }).then((res) => {
+          setRobotMessages((messages) => [...messages, res.text]);
+          setIsLoading(false);
+        });
+      } else {
+        setTimeout(() => {
+          setRobotMessages((messages) => [...messages, "Deu tudo certo"]);
+          setIsLoading(false);
+        }, 3000);
+      }
     }
 
     setUserMessages((histo) => [...histo, inputRef.current.value]);
     toogleRobotMessages();
+    inputRef.current.value = ""
   };
 
   return (
     <div className="chat">
-      {messages.map((chat) => {
+      {messages.map((chat, i) => {
         return (
-          <>
-            <Message>{chat.user}</Message>
-            <Message robot={true}>{chat.robot || <SyncLoader />}</Message>
-          </>
+          <div key={i}>
+            <Message key={chat.user + i}>{chat.user}</Message>
+            <Message key={chat.robot + i} robot={true}>
+              {chat.robot || <SyncLoader />}
+            </Message>
+          </div>
         );
       })}
-      <Input inputRef={inputRef} onSendMessage={handleSendMessage} />
+
+      <Input
+        inputRef={inputRef}
+        onSendMessage={handleSendMessage}
+        isLoading={isLoading}
+      />
     </div>
   );
 }
@@ -95,17 +123,31 @@ function NavBar({ selectedChat, chats, setSelectedChat }) {
   );
 }
 
-function Input({ inputRef, onSendMessage }) {
+function Input({ inputRef, onSendMessage, isLoading }) {
+  const [isFocus, setIsFocus] = useState(false);
   return (
     <div className="container-input">
       <input
+        disabled={isLoading}
+        onFocus={() => setIsFocus(true)}
+        onBlur={() => setIsFocus(false)}
         ref={inputRef}
-        name="chat-input"
+        name={`chat-input`}
         className="chat-input"
         placeholder="type something"
         type="text"
       />
-      <button onClick={onSendMessage}>Send</button>
+      <IconButton
+        sx={{
+          position: "fixed",
+          bottom: `${isFocus ? "80px" : "70px"}`,
+          marginLeft: "150px",
+          transition: "all 0.3s ease-in",
+        }}
+        onClick={onSendMessage}
+      >
+        <SendRoundedIcon />
+      </IconButton>
     </div>
   );
 }
@@ -136,3 +178,7 @@ function Message({ children, robot }) {
 }
 
 export default App;
+
+/**
+ *
+ */

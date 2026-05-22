@@ -1,28 +1,59 @@
-*{
-  margin:0;
+* {
+  margin: 0;
   padding: 0;
 }
-.navbar{
-  border:1px grey solid;
+.navbar {
+  border: 1px grey solid;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.navbar select{
+.navbar select {
   align-self: center;
   justify-self: center;
 }
-.container-input{
+.container-input {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.chat-input{
+.chat-input:not([disabled]) {
   position: fixed;
-  bottom: 150px;
+  bottom: 60px;
+  height: 60px;
+  padding-left: 8px;
+  border-radius: 15px;
+  border: 0.8px rgba(128,128,128,0.3) solid;
+  width: 50%;
+  transition: all 0.3s ease-in;
+  font-size: 1rem;
 }
-.container-input button{
+.chat-input:not([disabled]):focus {
+  border: 0.8px solid grey !important;
+  box-shadow: 2px 2px 1px rgba(128,128,128,0.95);
+  outline: none;
+  transform: translateY(-10px);
+  font-size: 1.15rem;
+}
+.chat-input[disabled]{
   position: fixed;
-  bottom: 150px;
-  margin-left: 150px;
+  bottom: 60px;
+  height: 60px;
+  padding-left: 8px;
+  border-radius: 15px;
+  border: 0.8px rgba(102, 102, 102, 0.3) solid;
+  width: 50%;
+  background-color: rgb(151, 151, 151);
+  color: rgb(255, 255, 255);
+  transition: all 0.3s ease-in;
+  font-size: 1rem;
 }
+.chat-input[disabled]:hover{
+  cursor:not-allowed;
+}
+.container-input button {
+  position: fixed;
+  right: 240px;
+}
+
+
