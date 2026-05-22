@@ -4,7 +4,7 @@ import { useKeydown } from "./hooks/useKeydown";
 import FaceIcon from "@mui/icons-material/Face";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
-import ArrowCircleUpTwoToneIcon from '@mui/icons-material/ArrowCircleUpTwoTone';
+import ArrowCircleUpTwoToneIcon from "@mui/icons-material/ArrowCircleUpTwoTone";
 
 import { IconButton } from "@mui/material";
 
@@ -51,8 +51,8 @@ function App() {
   );
 }
 function Chat({ chat }) {
-  const [userMessages, setUserMessages] = useState(["say"]);
-  const [robotMessages, setRobotMessages] = useState(["hello"]);
+  const [userMessages, setUserMessages] = useState(["say","say","say","say","say","say","say","say","say","say","say","say","say","say","say","say","say","say",]);
+  const [robotMessages, setRobotMessages] = useState(["hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello","hello"]);
   const [isLoading, setIsLoading] = useState(null);
   const messages = userMessages.map((message, i) => ({
     user: message,
@@ -83,12 +83,47 @@ function Chat({ chat }) {
     inputRef.current.value = "";
   };
 
+  useGSAP(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.fromTo(
+      ".up-button",
+      {
+        x: "1000px",
+        opacity: 0,
+        rotation: "180deg",
+      },
+      {
+        x: "-60px",
+        opacity: 1,
+        rotation: "360deg",
+        scrollTrigger: {
+          trigger: ".button-container",
+          start: "top 100px",
+          end: "bottom 100px",
+          scrub:true
+        },
+      }
+    );
+  });
+
   return (
     <div className="chat">
-
-      <IconButton >
-        <ArrowCircleUpTwoToneIcon />
-      </IconButton>
+      <div className="button-container">
+        <IconButton onClick={() => {
+          window.scrollTo({
+            top:0,
+            behavior:"smooth"
+          })
+        }} className="up-button">
+          <ArrowCircleUpTwoToneIcon
+            sx={{
+              width: "50px",
+              height: "50px",
+            }}
+          />
+        </IconButton>
+      </div>
       {messages.map((chat, i) => {
         return (
           <div id={`chat_${i}`} key={i}>
@@ -189,7 +224,7 @@ function Message({ children, robot, isLast }) {
           whiteSpace: "normal",
           wordBreak: "break-all",
           animation:
-            "typing 3s steps(2, end) infinite, blink-caret 0.75s step-end infinite;",
+            "typing 3s steps(2, end) infinite, blink-caret 0.75s step-end infinite",
         }}
       >
         {children}
