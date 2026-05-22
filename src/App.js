@@ -4,6 +4,7 @@ import { useKeydown } from "./hooks/useKeydown";
 import FaceIcon from "@mui/icons-material/Face";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import ArrowCircleUpTwoToneIcon from '@mui/icons-material/ArrowCircleUpTwoTone';
 
 import { IconButton } from "@mui/material";
 
@@ -12,6 +13,10 @@ import { GoogleGenAI } from "@google/genai";
 import { KEY_1 } from "./Keys"; // Adding your api key from gemini
 
 import { SyncLoader } from "react-spinners";
+
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
 function App() {
   const [chats, setChats] = useState(["Chat 1"]);
@@ -52,7 +57,7 @@ function Chat({ chat }) {
   const messages = userMessages.map((message, i) => ({
     user: message,
     robot: robotMessages.at(i) ?? "",
-  }));//!Como quando um estado é mudado ele re-renderiza todos os filhos toda vez que muda ele consegue mudar
+  })); //!Como quando um estado é mudado ele re-renderiza todos os filhos toda vez que muda ele consegue mudar
 
   const inputRef = useRef(null);
 
@@ -80,11 +85,19 @@ function Chat({ chat }) {
 
   return (
     <div className="chat">
+
+      <IconButton >
+        <ArrowCircleUpTwoToneIcon />
+      </IconButton>
       {messages.map((chat, i) => {
         return (
-          <div key={i}>
+          <div id={`chat_${i}`} key={i}>
             <Message key={chat.user + i}>{chat.user}</Message>
-            <Message key={chat.robot + i} robot={true}>
+            <Message
+              isLast={i === messages.length - 1}
+              key={chat.robot + i}
+              robot={true}
+            >
               {chat.robot || <SyncLoader />}
             </Message>
           </div>
@@ -157,11 +170,13 @@ function Input({ inputRef, onSendMessage, isLoading }) {
   );
 }
 
-function Message({ children, robot,isLast }) {
+function Message({ children, robot, isLast }) {
   const robotStyle = {
     display: "flex",
     alignItems: "center",
-    margin: `40px ${robot ? 15 : 80}px 0px ${robot ? 80 : 15}px`,
+    margin: `40px ${robot ? 15 : 80}px ${isLast ? 150 : 0}px ${
+      robot ? 80 : 15
+    }px`,
     gap: "5px",
     justifySelf: robot && "right",
   };
@@ -173,7 +188,8 @@ function Message({ children, robot,isLast }) {
           overflowWrap: "break-word",
           whiteSpace: "normal",
           wordBreak: "break-all",
-          animation:"typing 3s steps(2, end) infinite, blink-caret 0.75s step-end infinite;"
+          animation:
+            "typing 3s steps(2, end) infinite, blink-caret 0.75s step-end infinite;",
         }}
       >
         {children}
