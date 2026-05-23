@@ -15,12 +15,12 @@ export default function Chat({ chat, selectedChat }) {
   const [userMessages, setUserMessages] = useGetItem(
     selectedChat,
     [],
-    (item) => item.user
+    (item) => item.user,
   );
   const [robotMessages, setRobotMessages] = useGetItem(
     selectedChat,
     [],
-    (item) => item.robot
+    (item) => item.robot,
   );
 
   const [isLoading, setIsLoading] = useState(null);
@@ -29,14 +29,14 @@ export default function Chat({ chat, selectedChat }) {
       user: message,
       robot: robotMessages.at(i) ?? "",
     })) || [],
-    selectedChat
+    selectedChat,
   ); //!Como quando um estado é mudado ele re-renderiza todos os filhos toda vez que muda ele consegue mudar
   useEffect(() => {
     setMessages(
       userMessages?.map((message, i) => ({
         user: message,
         robot: robotMessages.at(i) ?? "",
-      }))
+      })),
     );
   }, [userMessages, robotMessages, setMessages, selectedChat]);
   const inputRef = useRef(null);
@@ -55,11 +55,13 @@ export default function Chat({ chat, selectedChat }) {
               setIsLoading(false);
             });
         } catch (err) {
-          setRobotMessages((messages) => [
-            ...messages,
-            '<p style="color:red">an error ocurred in response</p>',
-          ]);
-          setIsLoading(false);
+          setTimeout(() => {
+            setRobotMessages((messages) => [
+              ...messages,
+              '<p style="color:red">an error ocurred in response</p>',
+            ]);
+            setIsLoading(false);
+          }, 3000);
         }
       } else {
         const helpMessage =
