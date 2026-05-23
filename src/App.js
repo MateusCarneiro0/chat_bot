@@ -30,7 +30,7 @@ function App() {
         const ai = new GoogleGenAI({
           apiKey: KEY_1,
         });
-        setChat(ai.chats.create({ model: "gemini-3-flash-preview" }));
+        setChat(ai.chats.create({ model: "gemini-3.5-flash" }));
         setIsReadyChat(true);
       } catch (error) {
         console.error(error);
