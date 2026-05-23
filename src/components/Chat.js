@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useGetItem } from "../hooks/useGetItem";
 
 import { marked } from "marked";
 
@@ -10,14 +12,17 @@ import SendButton from "./SendButton";
 import { SyncLoader } from "react-spinners";
 
 export default function Chat({ chat, selectedChat }) {
-  const [userMessages, setUserMessages] = useState(() => {
-    const value = JSON.parse(localStorage.getItem(selectedChat));
-    return value?.length ? value.map((chat) => chat.user) : [];
-  });
-  const [robotMessages, setRobotMessages] = useState(() => {
-    const value = JSON.parse(localStorage.getItem(selectedChat));
-    return value?.length ? value.map((chat) => chat.robot) : [];
-  });
+  const [userMessages, setUserMessages] = useGetItem(
+    selectedChat,
+    [],
+    (item) => item.user
+  );
+  const [robotMessages, setRobotMessages] = useGetItem(
+    selectedChat,
+    [],
+    (item) => item.robot
+  );
+
   const [isLoading, setIsLoading] = useState(null);
   const [messages, setMessages] = useLocalStorage(
     userMessages?.map((message, i) => ({
@@ -41,13 +46,21 @@ export default function Chat({ chat, selectedChat }) {
     async function toogleRobotMessages() {
       setIsLoading(true);
       if (inputRef.current.value !== "/help") {
-        chat
-          .sendMessage({ message: inputRef.current.value })
-          .then(async (res) => {
-            const responseText = await marked.parse(res.text);
-            setRobotMessages((messages) => [...messages, responseText]);
-            setIsLoading(false);
-          });
+        try {
+          chat
+            .sendMessage({ message: inputRef.current.value })
+            .then(async (res) => {
+              const responseText = await marked.parse(res.text);
+              setRobotMessages((messages) => [...messages, responseText]);
+              setIsLoading(false);
+            });
+        } catch (err) {
+          setRobotMessages((messages) => [
+            ...messages,
+            '<p style="color:red">an error ocurred in response</p>',
+          ]);
+          setIsLoading(false);
+        }
       } else {
         const helpMessage =
           "Para usar você pode:\n\n<ul><li>Ctrl + Space: Para Escrever</li><li>Enter: Para Enviar</li><li>Ou Ctrl + m: para adicionar um chat</li><li>Ctrl + q: Limpar todos os chats(e recarregue)</li><li><strong>Dica:</strong>qualquer erro ou atraso recarregue a página!</li></ul>";

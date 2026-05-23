@@ -16,7 +16,7 @@ function App() {
   //!Modificando a chave o estado é resetado assim ele não replica o chat porque elementos iguais na mesma posição o react não faz nada
 
   const [chats, setChats] = useLocalStorage(["Chat 1", "Chat 2"], "chats");
-  const [selectedChat, setSelectedChat] = useState("Chat 1");
+  const [selectedChat, setSelectedChat] = useLocalStorage("Chat 1","selectedChat");
   const [isReadyChat, setIsReadyChat] = useState(false);
   const [chat, setChat] = useState(null);
 
@@ -51,7 +51,7 @@ function App() {
   );
   useKeydown(
     () =>
-      setChats((chatsState) => {
+      setChats(() => {
         localStorage.clear();
         window.location.reload(true);
         return ["Chat 1"];
